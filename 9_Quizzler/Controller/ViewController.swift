@@ -24,7 +24,7 @@ class ViewController: UIViewController {
     
     private let scoreLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "Helvetica", size: 10)
+        label.font = UIFont(name: "Helvetica", size: 20)
         label.textColor = .white
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -138,8 +138,10 @@ class ViewController: UIViewController {
     @objc func updateUI() {
         questionLabel.text = quizzBrain.getQuestionText()
         progressBarView.progress =  quizzBrain.getProgress()
+        scoreLabel.text = "Your score: \(quizzBrain.getScore())"
         trueButton.backgroundColor = .clear
         falseButton.backgroundColor = .clear
+        
     }
     
     @objc func answerButtonPressed(_ sender: UIButton){
