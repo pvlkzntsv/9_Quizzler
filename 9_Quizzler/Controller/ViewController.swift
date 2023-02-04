@@ -30,7 +30,6 @@ class ViewController: UIViewController {
         return label
     }()
     
-    
     private let contentStackView: UIStackView = {
         let stack = UIStackView()
         stack.axis  = .vertical
@@ -50,54 +49,54 @@ class ViewController: UIViewController {
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.5
         label.numberOfLines = 0
+        
         return label
     }()
     
-    private let trueButton: UIButton = {
-        let button = UIButton()
+    private lazy var trueButton: UIButton = {
+        let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        var config = UIButton.Configuration.plain()
+        var config = UIButton.Configuration.filled()
         config.background.backgroundColor = .clear
         config.title = "True"
         //        config.background.image = UIImage(imageLiteralResourceName: "Rectangle")
         config.background.strokeColor = .gray
-        config.background.strokeWidth = 3
+        config.background.strokeWidth = 2
         config.cornerStyle = .large
+        config.buttonSize = .large
         config.baseForegroundColor = .white
+        config.setDefaultContentInsets()
         button.configuration = config
-        
-        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-                      var outgoing = incoming
-            outgoing.font = UIFont(name: "Helvetica", size: 40)
-                      return outgoing
-                    }
+        button.addAction(UIAction { _ in self.answerButtonPressed(button)}, for: .touchUpInside)
         return button
     }()
     
     
-    private let falseButton: UIButton = {
-        let button = UIButton()
+    private lazy var falseButton: UIButton = {
+        let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        var config = UIButton.Configuration.plain()
+        var config = UIButton.Configuration.filled()
         config.background.backgroundColor = .clear
         config.title = "False"
         //        config.background.image = UIImage(imageLiteralResourceName: "Rectangle")
         config.background.strokeColor = .gray
-        config.background.strokeWidth = 3
+        config.background.strokeWidth = 2
         config.cornerStyle = .large
+        config.buttonSize = .large
+        config.setDefaultContentInsets()
         config.baseForegroundColor = .white
         button.configuration = config
+        button.addAction(UIAction { _ in self.answerButtonPressed(button)}, for: .touchUpInside)
         return button
     }()
     
     private var progressBarView: UIProgressView = {
         let progressView = UIProgressView()
         progressView.translatesAutoresizingMaskIntoConstraints = false
-        //        progressView.backgroundColor = .cyan
+        progressView.trackTintColor = .clear
+        progressView.progressTintColor = .purple
         return progressView
     }()
-    
-    
     
     func setupUI() {
         
@@ -116,16 +115,14 @@ class ViewController: UIViewController {
             contentStackView.heightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.heightAnchor),
             
             scoreLabel.heightAnchor.constraint(equalTo: contentStackView.heightAnchor, multiplier: 0.05),
-            questionLabel.heightAnchor.constraint(equalTo: contentStackView.heightAnchor, multiplier: 0.60),
-            trueButton.heightAnchor.constraint(equalTo: contentStackView.heightAnchor, multiplier: 0.15),
-            falseButton.heightAnchor.constraint(equalTo: contentStackView.heightAnchor, multiplier: 0.15),
-            progressBarView.heightAnchor.constraint(equalTo: contentStackView.heightAnchor, multiplier: 0.05),
+            questionLabel.heightAnchor.constraint(equalTo: contentStackView.heightAnchor, multiplier: 0.70),
+            trueButton.heightAnchor.constraint(equalTo: contentStackView.heightAnchor, multiplier: 0.10),
+            falseButton.heightAnchor.constraint(equalTo: contentStackView.heightAnchor, multiplier: 0.10),
+            progressBarView.heightAnchor.constraint(equalTo: contentStackView.heightAnchor, multiplier: 0.02),
             
             imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            
-            
         ])
     }
     
@@ -138,10 +135,26 @@ class ViewController: UIViewController {
         
     }
     
-    
-    func updateUI() {
+    @objc func updateUI() {
         questionLabel.text = quizzBrain.getQuestionText()
-        
+        progressBarView.progress =  quizzBrain.getProgress()
+        trueButton.backgroundColor = .clear
+        falseButton.backgroundColor = .clear
     }
     
+    @objc func answerButtonPressed(_ sender: UIButton){
+        guard let title = sender.titleLabel?.text! else { return }
+        
+        let answerIsCorrect = quizzBrain.checkAnswer(title)
+        
+        if answerIsCorrect {
+            sender.backgroundColor = .green
+        }else {
+            sender.backgroundColor = .red
+        }
+        
+        quizzBrain.nextQuestion()
+        
+        Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(updateUI), userInfo: nil, repeats: false)
+    }
 }
